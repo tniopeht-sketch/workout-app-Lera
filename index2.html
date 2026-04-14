@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Fitness App">
+    <title>Workout App</title>
+    <style>
+        :root {
+            --ios-bg: #f2f2f7;
+            --ios-card: #ffffff;
+            --ios-blue: #007aff;
+            --ios-green: #34c759;
+            --ios-red: #ff3b30;
+            --ios-text: #000000;
+            --group-border: #d1d1d6;
+        }
+
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--ios-bg);
+            color: var(--ios-text);
+            margin: 0;
+            padding: 55px 15px 80px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .progress-fixed-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--ios-card);
+            padding: 10px 0 8px;
+            z-index: 1000;
+            box-shadow: 0 1px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        #progress-text {
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 5px;
+            color: var(--ios-text);
+        }
+
+        .progress-container {
+            width: 90%;
+            height: 14px;
+            background: #e5e5ea;
+            border-radius: 7px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--ios-green);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .day-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .day-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            background: var(--ios-card);
+            color: var(--ios-blue);
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .day-btn.active {
+            background: var(--ios-blue);
+            color: white;
+        }
+
+        .muscle-group {
+            border: 2px solid var(--group-border);
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .group-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #8e8e93;
+            margin: 0 0 10px 10px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .exercise-card {
+            background: var(--ios-card);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .exercise-card.completed {
+            background: #e2f9e9;
+            border: 1px solid var(--ios-green);
+        }
+
+        .header {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .content {
+            display: none;
+            padding: 0 16px 16px;
+            border-top: 1px solid #f2f2f7;
+        }
+
+        .exercise-img {
+            width: 100%;
+            border-radius: 10px;
+            margin: 12px 0;
+            display: block;
+        }
+
+        .instr {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #3a3a3c;
+            margin-bottom: 15px;
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .inputs {
+            display: flex;
+            gap: 12px;
+        }
+
+        .inputs div { flex: 1; }
+
+        .inputs small {
+            display: block;
+            margin-bottom: 4px;
+            color: #8e8e93;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #d1d1d6;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .btn-done {
+            width: 100%;
+            padding: 14px;
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            margin-top: 15px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .cardio-block {
+            background: var(--ios-card);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cardio-block.completed {
+            background: #e2f9e9;
+            border: 1px solid var(--ios-green);
+        }
+
+        .reset-container {
+            margin-top: 30px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .btn-reset {
+            background: none;
+            color: var(--ios-red);
+            border: 1px solid var(--ios-red);
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-fixed-top">
+        <div id="progress-text">Прогресс: 0%</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="p-bar"></div>
+        </div>
+    </div>
+
+    <div class="day-selector">
+        <button class="day-btn active" id="b1" onclick="loadDay(1)">День 1</button>
+        <button class="day-btn" id="b2" onclick="loadDay(2)">День 2</button>
+        <button class="day-btn" id="b3" onclick="loadDay(3)">День 3</button>
+    </div>
+
+    <div id="workout-content"></div>
+
+    <div class="reset-container">
+        <button class="btn-reset" onclick="resetProgress()">Сбросить прогресс тренировки</button>
+    </div>
+
+<script>
+    const data = {
+        1: {
+            name: "Ягодицы + Ноги",
+            groups: [
+                {
+                    name: "Ноги и Ягодицы",
+                    type: "strength",
+                    exercises: [
+                        { n: "Ягодичный мост", w: "20", r: "12", f: "bridge.jpg", desc: "Ляг на спину, согни ноги. Поднимай таз вверх до прямой линии с телом, максимально сжимая ягодицы вверху." },
+                        { n: "Приседания", w: "15", r: "12", f: "squats_w.jpg", desc: "Держи спину ровно, пятки прижаты к полу. Опускайся до параллели, колени не выходят за носки." },
+                        { n: "Болгарские выпады", w: "10", r: "12", f: "bulgarian.jpg", desc: "Одну ногу поставь сзади на возвышение. Приседай на передней ноге, держа корпус ровно." },
+                        { n: "Отведения в кроссовере", w: "5", r: "12", f: "kickback.jpg", desc: "Стоя лицом к тренажеру, отводи прямую ногу назад за счет мышц ягодиц. Не прогибай поясницу." },
+                        { n: "Разведения ног", w: "30", r: "12", f: "abductor.jpg", desc: "Сидя в тренажере, разводи ноги в стороны. Делай движение подконтрольно." },
+                        { n: "Сгибание ног лёжа", w: "20", r: "12", f: "lying_curl.jpg", desc: "Сгибай ноги, подтягивая валики к ягодицам. Медленно возвращай в исходное положение." }
+                    ]
+                },
+                {
+                    name: "Прес",
+                    type: "strength",
+                    exercises: [
+                        { n: "Скручивания", w: "0", r: "12", f: "crunch.jpg", desc: "Поднимай лопатки от пола за счет пресса, поясница прижата." },
+                        { n: "Планка", w: "0", r: "30 сек", f: "planka.jpg", desc: "Держи тело в одну линию на предплечьях. Напряги живот и не провисай." }
+                    ]
+                },
+                { name: "Кардио", type: "cardio", time: "25 мин" }
+            ]
+        },
+        2: {
+            name: "Спина + Руки",
+            groups: [
+                {
+                    name: "Спина",
+                    type: "strength",
+                    exercises: [
+                        { n: "Тяга верхнего блока", w: "25", r: "12", f: "vblock.jpg", desc: "Тяни рукоять к груди, сводя лопатки. Не отклоняйся сильно назад." },
+                        { n: "Тяга горизонт. блока", w: "20", r: "12", f: "hblock.jpg", desc: "Тяни рукоять к животу, держи спину ровно и своди лопатки вместе." },
+                        { n: "Тяга гантелей в наклоне", w: "10", r: "12", f: "db_row.jpg", desc: "В наклоне тяни гантели к поясу, локти веди вдоль туловища." }
+                    ]
+                },
+                {
+                    name: "Руки",
+                    type: "strength",
+                    exercises: [
+                        { n: "Сгибания с гантелями", w: "7", r: "12", f: "biceps_db.jpg", desc: "Поднимай гантели на бицепс, не раскачивая корпус. Локти прижаты." },
+                        { n: "Разгибания на блоке", w: "15", r: "12", f: "triceps_pushdown.jpg", desc: "Разгибай руки вниз до конца, фиксируя локти по бокам." }
+                    ]
+                },
+                {
+                    name: "Прес",
+                    type: "strength",
+                    exercises: [
+                        { n: "Подъём ног лёжа", w: "0", r: "12", f: "leg_raises.jpg", desc: "Лёжа на спине, поднимай прямые ноги до вертикали и медленно опускай." },
+                        { n: "Велосипед", w: "0", r: "12", f: "bicycle.jpg", desc: "Тянись локтем к противоположному колену, имитируя езду на велосипеде." }
+                    ]
+                },
+                { name: "Кардио", type: "cardio", time: "25 мин" }
+            ]
+        },
+        3: {
+            name: "Ягодицы + Плечи",
+            groups: [
+                {
+                    name: "Ягодицы",
+                    type: "strength",
+                    exercises: [
+                        { n: "Подъем ноги на четвереньках", w: "0", r: "12", f: "donkey_kicks.jpg", desc: "Стоя на четвереньках, поднимай согнутую ногу вверх пяткой к потолку." },
+                        { n: "Ягодичный мост", w: "20", r: "12", f: "bridge.jpg", desc: "Классический подъем таза с акцентом на сжатие ягодиц." },
+                        { n: "Шаги на платформу", w: "0", r: "12", f: "step_up.jpg", desc: "Шагай на платформу или скамью, полностью выпрямляя рабочую ногу." }
+                    ]
+                },
+                {
+                    name: "Плечи",
+                    type: "strength",
+                    exercises: [
+                        { n: "Жим гантелей вверх", w: "10", r: "12", f: "db_press.jpg", desc: "Выжимай гантели над головой, не прогибая спину." },
+                        { n: "Разведения в стороны", w: "5", r: "12", f: "lateral_raise.jpg", desc: "Поднимай гантели через стороны до уровня плеч." },
+                        { n: "Разведения в наклоне", w: "4", r: "12", f: "rear_delt.jpg", desc: "В наклоне разводи руки в стороны, прорабатывая заднюю дельту." }
+                    ]
+                },
+                {
+                    name: "Прес",
+                    type: "strength",
+                    exercises: [
+                        { n: "Планка боковая", w: "0", r: "30 сек", f: "side_plank.jpg", desc: "Держи тело на одном боку, опираясь на предплечье. Таз не опускай." },
+                        { n: "Скручивания", w: "0", r: "12", f: "crunch.jpg", desc: "Классические скручивания на пресс." }
+                    ]
+                },
+                { name: "Кардио", type: "cardio", time: "25 мин" }
+            ]
+        }
+    };
+
+    let totalTasks = 0;
+
+    function loadDay(day) {
+        document.querySelectorAll('.day-btn').forEach((b, i) => b.classList.toggle('active', i+1 === day));
+        const container = document.getElementById('workout-content');
+        container.innerHTML = `<h1>${data[day].name}</h1>`;
+        totalTasks = 0;
+
+        data[day].groups.forEach((group, gIdx) => {
+            if(group.type === 'cardio') {
+                totalTasks++;
+                const id = `d${day}-cardio-${gIdx}`;
+                const completed = localStorage.getItem(id) ? 'completed' : '';
+                container.innerHTML += `
+                    <div class="cardio-block ${completed}" id="${id}">
+                        <div style="font-weight:700; font-size:17px;">🏃‍♂️ ${group.name}: ${group.time}</div>
+                        <button class="btn-done" style="width: auto; padding: 10px 30px;" onclick="mark('${id}')">Готово</button>
+                    </div>`;
+            } else {
+                let groupHtml = `<div class="muscle-group"><div class="group-title">${group.name}</div>`;
+                group.exercises.forEach((ex, i) => {
+                    totalTasks++;
+                    const id = `d${day}-g-${group.name.replace(/\s+/g, '')}-${i}`;
+                    const completed = localStorage.getItem(id) ? 'completed' : '';
+                    groupHtml += `
+                        <div class="exercise-card ${completed}" id="${id}">
+                            <div class="header" onclick="showContent('${id}')">
+                                <span>${ex.n}</span>
+                                <span style="color:#007aff; font-size:20px;">+</span>
+                            </div>
+                            <div class="content" id="c-${id}">
+                                <img src="img/${ex.f}" class="exercise-img" onerror="this.src='https://via.placeholder.com/300x150?text=Нет+фото'">
+                                <div class="instr">${ex.desc}</div>
+                                <div class="inputs">
+                                    <div><small>Вес (кг)</small><input type="text" value="${ex.w}"></div>
+                                    <div><small>Повторений</small><input type="text" value="${ex.r}"></div>
+                                </div>
+                                <button class="btn-done" onclick="mark('${id}')">Готово</button>
+                            </div>
+                        </div>`;
+                });
+                groupHtml += `</div>`;
+                container.innerHTML += groupHtml;
+            }
+        });
+        updateProgress();
+    }
+
+    function showContent(id) {
+        const el = document.getElementById('c-' + id);
+        const allContent = document.querySelectorAll('.content');
+        const isVisible = el.style.display === 'block';
+        allContent.forEach(c => c.style.display = 'none');
+        el.style.display = isVisible ? 'none' : 'block';
+    }
+
+    function mark(id) {
+        document.getElementById(id).classList.add('completed');
+        localStorage.setItem(id, 'true');
+        const content = document.getElementById('c-' + id);
+        if(content) content.style.display = 'none';
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const completed = document.querySelectorAll('.completed').length;
+        const percent = totalTasks > 0 ? Math.round((completed / totalTasks) * 100) : 0;
+        document.getElementById('p-bar').style.width = percent + '%';
+        document.getElementById('progress-text').innerText = 'Прогресс: ' + percent + '%';
+    }
+
+    function resetProgress() {
+        if(confirm("Очистить прогресс и начать новую тренировку?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    loadDay(1);
+</script>
+</body>
+</html>
